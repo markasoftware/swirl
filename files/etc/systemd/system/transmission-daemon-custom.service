@@ -1,0 +1,14 @@
+[Unit]
+Description=Transmission Daemon (Custom)
+After=network.target
+
+[Service]
+User=downloads
+Type=notify
+ExecStart=/usr/bin/transmission-daemon -f --log-error -g /home/downloads/transmission
+KillSignal=kill -s STOP $MAINPID
+ExecReload=kill -HUP $MAINPID
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
