@@ -11,6 +11,11 @@ PublicKey = m4_getenv_req(WIREGUARD_NATHAN_PUBKEY)
 AllowedIPs = m4_getenv_req(WIREGUARD_NATHAN_IP)
 
 [Peer]
+# Mark's Desktop
+PublicKey = m4_getenv_req(WIREGUARD_HOME_PUBKEY)
+AllowedIPs = m4_getenv_req(WIREGUARD_HOME_IP)
+
+[Peer]
 # Mark's Laptop
 PublicKey = m4_getenv_req(WIREGUARD_AWAY_PUBKEY)
 AllowedIPs = m4_getenv_req(WIREGUARD_AWAY_IP)

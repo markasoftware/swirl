@@ -3,7 +3,16 @@
 # Copyright 2020 Mark Polyakov
 
 function remotely {
-    ssh -S /tmp/%p-$$.sock "$REMOTELY_HOST" "$@"
+    # SSH passes its arguments to a shell, so we need to handle splitting stuff carefully. SSH takes
+    # each command argument, joins them with spaces, then sends that to the remote shell. We want an extra layer of quoting around each argument.
+    local ssh_command=
+    for arg in "$@"
+    do
+	arg=${arg//\\/\\\\}
+	arg=${arg//\"/\\\"}
+	ssh_command+=" \"$arg\""
+    done
+    ssh -S /tmp/%p-$$.sock "$REMOTELY_HOST" "$ssh_command"
 }
 
 # args: source, destination, extra rsync args
@@ -11,7 +20,7 @@ function ez_rsync {
     local local_path=$1
     local remote_path=$2
     shift 2
-    rsync -Rrtpl --info=progress2 "$@" "$local_path" "$REMOTELY_HOST:$remote_path"
+    rsync -Rrtp --info=progress2 "$@" "$local_path" "$REMOTELY_HOST:$remote_path"
 }
 
 function upload {
@@ -25,6 +34,12 @@ function upload {
     ez_rsync "$LDIR/$local_path" / "$@"
 }
 
+function backup {
+    last_backup_dir=$(find "$backup_dir" -maxdepth 1 -name '????-??-??' -type d | sort | tail -n 1)
+    new_backup_dir="$(dirname "$backup_dir")/$(date -I)"
+    rsync -rtp --info=progress2 --link-dest="$last_backup_dir" "$@" "$REMOTELY_HOST:$1"
+}
+
 function env_req {
     if [[ -z $(printenv "$1") ]]
     then
@@ -35,12 +50,11 @@ function env_req {
 
 set -e
 
-if [[ $0 != */* ]]
+if (( $# != 1 ))
 then
-    echo "\$0, which is \"$0\" does not look like a file path. Unable to determine correct pwd"
+    echo 'Usage: remotely.sh go.sh'
     exit 1
 fi
-cd "$(dirname "$0")"
 
 if [[ -z "$REMOTELY_HOST" ]]
 then
@@ -60,3 +74,10 @@ find "$LDIR" -name '*.m4' -print0 | xargs -0 -L1 --no-run-if-empty -- bash -c 'm
 set -x
 
 ssh -oControlMaster=yes -oControlPersist=200 -oControlPath=/tmp/%p-$$.sock "$REMOTELY_HOST" exit
+
+go_path="$(readlink -f "$1")"
+cd "$(dirname "$1")"
+source "$go_path"
+echo
+echo
+echo Done!
