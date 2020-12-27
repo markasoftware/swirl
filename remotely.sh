@@ -3,6 +3,7 @@
 # Copyright 2020 Mark Polyakov
 
 function remotely {
+    echo "REMOTELY: $*"
     # SSH passes its arguments to a shell, so we need to handle splitting stuff carefully. SSH takes
     # each command argument, joins them with spaces, then sends that to the remote shell. We want an extra layer of quoting around each argument.
     local ssh_command=
@@ -29,6 +30,7 @@ function upload {
 	echo 'Need to pass argument to upload!'
 	exit 1
     fi
+    echo "UPLOAD: $1 w/ opts $*"
     local local_path=$1
     shift
     ez_rsync "$LDIR/$local_path" / "$@"
@@ -71,9 +73,8 @@ find "$LDIR" -name '*~' -o -name '*#*' -delete
 # use xargs instead of -exec so that errors are fatal
 find "$LDIR" -name '*.m4' -print0 | xargs -0 -L1 --no-run-if-empty -- bash -c 'm4 -P "$0" "$1" > "${1%.m4}"' "$PWD/include.m4"
 
-set -x
-
 ssh -oControlMaster=yes -oControlPersist=200 -oControlPath=/tmp/%p-$$.sock "$REMOTELY_HOST" exit
+export RSYNC_RSH="ssh -S /tmp/%p-$$.sock"
 
 go_path="$(readlink -f "$1")"
 cd "$(dirname "$1")"

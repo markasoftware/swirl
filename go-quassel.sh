@@ -7,7 +7,7 @@ remotely systemctl disable quasselcore
 remotely id quassel-custom 2>/dev/null || remotely useradd -md /home/quassel-custom quassel-custom
 
 # press x to hope
-remotely su - postgres -c "psql -c \"CREATE USER \\\"quassel-custom\\\" WITH PASSWORD '$QUASSEL_POSTGRES_PASSWORD'\"";
+remotely su - postgres -c "psql -c \"CREATE USER \\\"quassel-custom\\\" WITH PASSWORD '$QUASSEL_POSTGRES_PASSWORD'\"" || true
 remotely su - postgres -c 'createdb --owner quassel-custom quassel-custom' || true
 
 upload /etc/systemd/system/quassel-custom.service

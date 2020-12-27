@@ -44,7 +44,7 @@
     "ratio-limit-enabled": false,
     "rename-partial-files": true,
     "rpc-authentication-required": true,
-    "rpc-bind-address": "0.0.0.0",
+    "rpc-bind-address": "m4_getenv_req(WIREGUARD_IP)",
     "rpc-enabled": true,
     "rpc-host-whitelist": "",
     "rpc-host-whitelist-enabled": false,
