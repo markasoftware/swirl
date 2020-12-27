@@ -1,5 +1,8 @@
 #!/bin/bash
 
+source remotely.sh
+remotely_go
+
 remotely apt-get install -y rsync postgresql quassel-core libqt5sql5-psql
 remotely systemctl stop quasselcore
 remotely systemctl disable quasselcore
@@ -20,3 +23,7 @@ remotely systemctl enable postgresql
 remotely systemctl start quassel-custom
 remotely systemctl enable quassel-custom
 remotely systemctl reload quassel-custom
+
+echo
+echo 'DONE with Quassel'
+echo

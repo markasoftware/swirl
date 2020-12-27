@@ -1,5 +1,8 @@
 #!/bin/bash
 
+source remotely.sh
+remotely_go
+
 env_req NAVIDROME_VERSION
 env_req TRANSMISSION_PASSWORD
 
@@ -22,3 +25,7 @@ remotely systemctl start transmission-daemon-custom
 remotely systemctl reload transmission-daemon-custom || true
 remotely systemctl restart navidrome-custom
 remotely systemctl enable transmission-daemon-custom navidrome-custom
+
+echo
+echo 'DONE with Downloads'
+echo

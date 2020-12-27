@@ -1,5 +1,8 @@
 #!/bin/bash
 
+source remotely.sh
+remotely_go
+
 remotely apt-get install -y rsync wireguard
 
 upload /etc/wireguard -p --chmod 600
@@ -13,3 +16,7 @@ remotely systemctl daemon-reload
 remotely systemctl reload wg-quick@wg0 || true
 remotely systemctl start wg-quick@wg0 iptables-custom
 remotely systemctl enable wg-quick@wg0 iptables-custom
+
+echo
+echo 'DONE with Networking'
+echo

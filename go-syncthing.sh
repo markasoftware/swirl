@@ -1,5 +1,8 @@
 #!/bin/bash
 
+source remotely.sh
+remotely_go
+
 remotely apt-get install -y rsync syncthing
 
 remotely id syncboi 2>/dev/null || remotely useradd -md /home/syncboi syncboi
@@ -10,3 +13,7 @@ remotely systemctl restart syncthing@syncboi
 remotely systemctl enable syncthing@syncboi
 
 # that was easy!
+
+echo
+echo 'DONE with Syncthing'
+echo

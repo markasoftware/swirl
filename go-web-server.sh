@@ -1,5 +1,8 @@
 #!/bin/bash
 
+source remotely.sh
+remotely_go
+
 env_req LETSENCRYPT_EMAIL
 
 remotely apt-get install -y rsync nginx certbot
@@ -21,3 +24,7 @@ remotely systemctl start nginx
 remotely systemctl enable nginx
 
 upload /build/letsencrypt
+
+echo
+echo 'DONE with Web Server'
+echo
