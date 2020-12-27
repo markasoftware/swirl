@@ -48,7 +48,7 @@ function backup_to {
     shift 2
     mkdir -p "$(dirname "$backup_dest")"
 
-    echo "BACKUP: $backup_src into $backup_dest"
+    echo "BACKUP: $backup_src into $backup_dest_abs"
 
     if [[ -n "$LAST_BACKUP_DIR" ]]
     then
@@ -129,7 +129,7 @@ function remotely_go {
 
 function remotely_backup {
     [[ -z $remotely_backup_running ]] || return
-    (( $# == 1 )) || error_out 'remotely_backup needs a '
+    (( $# == 1 )) || error_out 'usage: remotely_backup identifier'
 
     set -e
     remotely_backup_running=true
