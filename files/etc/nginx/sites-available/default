@@ -6,20 +6,35 @@ server {
        }
 }
 
-# server {
-#        listen 443 ssl http2;
-#        server_name www.markasoftware.com;
+server {
+       listen 443 ssl http2;
+       server_name www.markasoftware.com;
 
-#        return 301 https://markasoftware.com$request_uri;
+       return 301 https://markasoftware.com$request_uri;
 
-#        ssl_certificate /etc/letsencrypt/live/markasoftware.com/fullchain.pem;
-#        ssl_certificate_key /etc/letsencrypt/live/markasoftware.com/privkey.pem;
+       ssl_certificate /etc/letsencrypt/live/www.markasoftware.com/fullchain.pem;
+       ssl_certificate_key /etc/letsencrypt/live/www.markasoftware.com/privkey.pem;
 
-#        ssl_session_timeout 5m;
-#        ssl_protocols SSLv3 TLSv1 TLSv1.1 TLSv1.2;
-#        ssl_ciphers "HIGH:!aNULL:!MD5 or HIGH:!aNULL:!MD5:!3DES";
-#        ssl_prefer_server_ciphers on;
-# }
+       ssl_session_timeout 5m;
+       ssl_protocols SSLv3 TLSv1 TLSv1.1 TLSv1.2;
+       ssl_ciphers "HIGH:!aNULL:!MD5 or HIGH:!aNULL:!MD5:!3DES";
+       ssl_prefer_server_ciphers on;
+}
+
+server {
+       listen 443 ssl http2;
+       server_name swirl.markasoftware.com;
+
+       return 301 https://markasoftware.com$request_uri;
+
+       ssl_certificate /etc/letsencrypt/live/swirl.markasoftware.com/fullchain.pem;
+       ssl_certificate_key /etc/letsencrypt/live/swirl.markasoftware.com/privkey.pem;
+
+       ssl_session_timeout 5m;
+       ssl_protocols SSLv3 TLSv1 TLSv1.1 TLSv1.2;
+       ssl_ciphers "HIGH:!aNULL:!MD5 or HIGH:!aNULL:!MD5:!3DES";
+       ssl_prefer_server_ciphers on;
+}
 
 server {
         listen 443 ssl http2 default_server;
@@ -37,8 +52,8 @@ server {
                  proxy_pass http://127.0.0.1:4533;
         }
 
-        ssl_certificate /etc/letsencrypt/live/swirl.markasoftware.com/fullchain.pem;
-        ssl_certificate_key /etc/letsencrypt/live/swirl.markasoftware.com/privkey.pem;
+        ssl_certificate /etc/letsencrypt/live/markasoftware.com/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/markasoftware.com/privkey.pem;
 
         ssl_session_timeout 5m;
 
