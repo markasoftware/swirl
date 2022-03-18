@@ -1,37 +1,53 @@
 #!/bin/bash
 
-# Copyright 2020 Mark Polyakov
+# This script originally authored by Mark Polyakov in 2020
+# I release this script to the public domain. I'd appreciate it if you left this
+# message here, though.
+
+function remotely_no_escape {
+    ssh -S /tmp/%p-$$.sock $REMOTELY_SSH_OPTIONS "$REMOTELY_HOST" "$@"
+}
 
 function remotely {
     echo "REMOTELY: $*"
     # SSH passes its arguments to a shell, so we need to handle splitting stuff carefully. SSH takes
-    # each command argument, joins them with spaces, then sends that to the remote shell. We want an extra layer of quoting around each argument.
+    # each command argument, joins them with spaces, then sends that to the remote shell. We want an
+    # extra layer of quoting around each argument.
     local ssh_command=
     for arg in "$@"
     do
 	arg=${arg//\\/\\\\}
 	arg=${arg//\"/\\\"}
+	arg=${arg//\`/\\\`}
+	arg=${arg//\$/\\\$}
 	ssh_command+=" \"$arg\""
     done
-    ssh -S /tmp/%p-$$.sock "$REMOTELY_HOST" "$ssh_command"
+    remotely_no_escape "$ssh_command"
 }
 
 # args: source, destination, extra rsync args
-function ez_rsync {
-    (( $# >= 2 )) || error_out 'usage: ez_rsync local_path remote_path'
+function ez_rsync_up {
+    (( $# >= 2 )) || error_out 'usage: ez_rsync_up local_path remote_path extra_opts'
     local local_path=$1
     local remote_path=$2
     shift 2
+    # CUSTOMIZE: Rsync upload default options
     rsync -Rrtp --info=progress2 "$@" "$local_path" "$REMOTELY_HOST:$remote_path"
+}
+
+# args: rsync args. This function exists only for customization
+function ez_rsync_down {
+    # CUSTOMIZE: Rsync download default options
+    rsync -rtpL --info=progress2 "$@"
 }
 
 function upload {
     env_req LDIR
-    (( $# >= 1 )) || error_out 'usage: upload /etc/path'
+    (( $# >= 1 )) || error_out 'usage: upload --extra-rsync-option /etc/path'
     echo "UPLOAD: $*"
     local local_path=$1
     shift
-    ez_rsync "$LDIR/$local_path" / "$@"
+    ez_rsync_up "$LDIR/$local_path" / "$@"
 }
 
 # arg 1: source
@@ -53,9 +69,9 @@ function backup_to {
     if [[ -n "$LAST_BACKUP_DIR" ]]
     then
 	# TODO: will this link dest usage work for files, or only directories?
-	rsync -rtp --info=progress2 --link-dest="$LAST_BACKUP_DIR/$backup_dest_rel" "$@" "$REMOTELY_HOST:$backup_src" "$backup_dest_abs"
+	ez_rsync_down --link-dest="$LAST_BACKUP_DIR/$backup_dest_rel" "$@" "$REMOTELY_HOST:$backup_src" "$backup_dest_abs"
     else
-	rsync -rtp --info=progress2 "$@" "$REMOTELY_HOST:$backup_src" "$backup_dest_abs"
+	ez_rsync_down "$@" "$REMOTELY_HOST:$backup_src" "$backup_dest_abs"
     fi
 }
 
@@ -81,8 +97,9 @@ function ssh_connect {
     # TODO: support custom port and/or SSH config file
     env_req REMOTELY_HOST
     echo "Establishing SSH connection to $REMOTELY_HOST"
-    ssh -oControlMaster=yes -oControlPersist=200 -oControlPath=/tmp/%p-$$.sock "$REMOTELY_HOST" exit
-    export RSYNC_RSH="ssh -S /tmp/%p-$$.sock"
+    ssh -oControlMaster=yes -oControlPersist=${REMOTELY_CONNECTION_TIMEOUT:-200} -oControlPath=/tmp/%p-$$.sock \
+	$REMOTELY_SSH_OPTIONS "$REMOTELY_HOST" exit
+    export RSYNC_RSH="ssh -S /tmp/%p-$$.sock $REMOTELY_SSH_OPTIONS"
 }
 
 function process_m4_templates {
@@ -117,7 +134,10 @@ function prepare_backup_dir {
 
 function remotely_go {
     # bail out if we're already in a remotely main
-    [[ -z $remotely_go_running ]] || return
+    if [[ -n $remotely_go_running ]]
+    then
+	    return
+    fi
 
     set -e
     remotely_go_running=true
