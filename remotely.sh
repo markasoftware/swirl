@@ -1,13 +1,23 @@
 #!/bin/bash
 
-# This script originally authored by Mark Polyakov in 2020
-# I release this script to the public domain. I'd appreciate it if you left this
-# message here, though.
+# This script originally authored by Mark Polyakov in 2020. I release this script to the public
+# domain under the Unlicense, see unlicense.org. I'd appreciate it if you left this message here,
+# though.
 
+read -r -d '' remotely_m4_preamble <<'EOF'
+m4_changequote(`!<', `>!')m4_dnl
+m4_define(!<m4_getenv>!, !<m4_esyscmd(!<printf "$$1">!)>!)m4_dnl
+m4_define(!<m4_getenv_req>!, !<m4_ifelse(m4_getenv(!<$1>!),,!<m4_errprint(!<Missing required environment variable $1
+>!)m4_m4exit(1)>!,!<m4_getenv(!<$1>!)>!)>!)m4_dnl"
+EOF
+
+# args: Are passed to ssh with no escaping
 function remotely_no_escape {
     ssh -S /tmp/%p-$$.sock $REMOTELY_SSH_OPTIONS "$REMOTELY_HOST" "$@"
 }
 
+# args: Are passed to SSH, with escaping to make it seem like word-splitting is happening on the
+# local shell, not the remote shell.
 function remotely {
     echo "REMOTELY: $*"
     # SSH passes its arguments to a shell, so we need to handle splitting stuff carefully. SSH takes
@@ -41,9 +51,11 @@ function ez_rsync_down {
     rsync -rtpL --info=progress2 "$@"
 }
 
+# arg 1: path
+# arg 2+: rsync opts
 function upload {
     env_req LDIR
-    (( $# >= 1 )) || error_out 'usage: upload --extra-rsync-option /etc/path'
+    (( $# >= 1 )) || error_out 'usage: upload /etc/path --extra --rsync --options'
     echo "UPLOAD: $*"
     local local_path=$1
     shift
@@ -108,10 +120,15 @@ function process_m4_templates {
     LDIR=${LDIR:-$(dirname "${BASH_SOURCE[0]}")/files}
     LDIR=${LDIR%/}
     LDIR="${LDIR}/."
-    trap "find '$LDIR' -name '*.m4' -print0 | sed -z 's/.m4$//' | xargs -0 rm -f" EXIT
+    remotely_m4_preamble_file=$(mktemp)
+    # TODO: fix when LDIR or preamble file contains apostrophe
+    trap "find '$LDIR' -name '*.m4' -print0 | sed -z 's/.m4$//' | xargs -0 rm -f; rm -f '$remotely_m4_preamble_file'" EXIT
+    # CUSTOMIZE: Files to delete. These ones are emacs lockfiles and such
     find "$LDIR" -name '*~' -o -name '*#*' -delete
+
+    echo "$remotely_m4_preamble" > "$remotely_m4_preamble_file"
     # use xargs instead of -exec so that errors are fatal
-    find "$LDIR" -name '*.m4' -print0 | xargs -0 -L1 --no-run-if-empty -- bash -c 'm4 -P "$0" "$1" > "${1%.m4}"' "$PWD/include.m4"
+    find "$LDIR" -name '*.m4' -print0 | xargs -0 -L1 --no-run-if-empty -- bash -c 'm4 -P "$0" "$1" > "${1%.m4}"' "$remotely_m4_preamble_file"
 }
 
 function prepare_backup_dir {

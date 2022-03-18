@@ -12,8 +12,8 @@ server {
 
        return 301 https://markasoftware.com$request_uri;
 
-       ssl_certificate /etc/letsencrypt/live/www.markasoftware.com/fullchain.pem;
-       ssl_certificate_key /etc/letsencrypt/live/www.markasoftware.com/privkey.pem;
+       ssl_certificate /etc/letsencrypt/live/markasoftware.com/fullchain.pem;
+       ssl_certificate_key /etc/letsencrypt/live/markasoftware.com/privkey.pem;
 
        ssl_session_timeout 5m;
        ssl_protocols SSLv3 TLSv1 TLSv1.1 TLSv1.2;
@@ -27,8 +27,8 @@ server {
 
        return 301 https://markasoftware.com$request_uri;
 
-       ssl_certificate /etc/letsencrypt/live/swirl.markasoftware.com/fullchain.pem;
-       ssl_certificate_key /etc/letsencrypt/live/swirl.markasoftware.com/privkey.pem;
+       ssl_certificate /etc/letsencrypt/live/markasoftware.com/fullchain.pem;
+       ssl_certificate_key /etc/letsencrypt/live/markasoftware.com/privkey.pem;
 
        ssl_session_timeout 5m;
        ssl_protocols SSLv3 TLSv1 TLSv1.1 TLSv1.2;
@@ -47,10 +47,10 @@ server {
                  add_header Cache-Control "public, max-age=3600";
         }
 
-        location /navidrome {
-                 include proxy_params;
-                 proxy_pass http://127.0.0.1:4533;
-        }
+        # location /navidrome {
+        #          include proxy_params;
+        #          proxy_pass http://127.0.0.1:4533;
+        # }
 
         ssl_certificate /etc/letsencrypt/live/markasoftware.com/fullchain.pem;
         ssl_certificate_key /etc/letsencrypt/live/markasoftware.com/privkey.pem;

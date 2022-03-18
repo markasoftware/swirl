@@ -17,8 +17,8 @@ upload /etc/nginx/sites-enabled -L --delete
 upload /build/letsencrypt
 upload /etc/letsencrypt/renewal-hooks
 remotely systemctl stop nginx
-remotely make -C /build/letsencrypt "LETSENCRYPT_EMAIL=$LETSENCRYPT_EMAIL" \
-	 'LETSENCRYPT_DOMAINS=swirl.markasoftware.com markasoftware.com www.markasoftware.com'
+remotely certbot certonly --non-interactive --agree-tos --standalone \
+	 --cert-name markasoftware.com -d markasoftware.com,swirl.markasoftware.com,www.markasoftware.com
 
 remotely systemctl start nginx
 remotely systemctl enable nginx
