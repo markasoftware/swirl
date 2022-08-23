@@ -12,13 +12,7 @@ server {
 
        return 301 https://markasoftware.com$request_uri;
 
-       ssl_certificate /etc/letsencrypt/live/markasoftware.com/fullchain.pem;
-       ssl_certificate_key /etc/letsencrypt/live/markasoftware.com/privkey.pem;
-
-       ssl_session_timeout 5m;
-       ssl_protocols SSLv3 TLSv1 TLSv1.1 TLSv1.2;
-       ssl_ciphers "HIGH:!aNULL:!MD5 or HIGH:!aNULL:!MD5:!3DES";
-       ssl_prefer_server_ciphers on;
+       include custom/ssl_params;
 }
 
 server {
@@ -27,13 +21,7 @@ server {
 
        return 301 https://markasoftware.com$request_uri;
 
-       ssl_certificate /etc/letsencrypt/live/markasoftware.com/fullchain.pem;
-       ssl_certificate_key /etc/letsencrypt/live/markasoftware.com/privkey.pem;
-
-       ssl_session_timeout 5m;
-       ssl_protocols SSLv3 TLSv1 TLSv1.1 TLSv1.2;
-       ssl_ciphers "HIGH:!aNULL:!MD5 or HIGH:!aNULL:!MD5:!3DES";
-       ssl_prefer_server_ciphers on;
+       include custom/ssl_params;
 }
 
 server {
@@ -47,17 +35,12 @@ server {
                  add_header Cache-Control "public, max-age=3600";
         }
 
-        # location /navidrome {
-        #          include proxy_params;
-        #          proxy_pass http://127.0.0.1:4533;
-        # }
+        location /subsonic {
+		 gzip on;
+		 gzip_types application/javascript text/css;
+                 include custom/proxy_params;
+                 proxy_pass http://127.0.0.1:4533;
+        }
 
-        ssl_certificate /etc/letsencrypt/live/markasoftware.com/fullchain.pem;
-        ssl_certificate_key /etc/letsencrypt/live/markasoftware.com/privkey.pem;
-
-        ssl_session_timeout 5m;
-
-        ssl_protocols SSLv3 TLSv1 TLSv1.1 TLSv1.2;
-        ssl_ciphers "HIGH:!aNULL:!MD5 or HIGH:!aNULL:!MD5:!3DES";
-        ssl_prefer_server_ciphers on;
+	include custom/ssl_params;
 }
