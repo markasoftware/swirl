@@ -13,5 +13,7 @@ ExecStart=/usr/local/bin/navidrome --configfile /etc/navidrome.toml
 WorkingDirectory=/home/downloads/navidrome
 TimeoutStopSec=20
 KillMode=process
+MemoryMax=250M
+MemorySwapMax=0
 Restart=on-failure
 
