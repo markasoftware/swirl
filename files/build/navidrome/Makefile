@@ -1,6 +1,6 @@
 navidrome_dir := navidrome-$(NAVIDROME_VERSION)
 navidrome_tar := navidrome-$(NAVIDROME_VERSION).tar.gz
-navidrome_url := https://github.com/deluan/navidrome/releases/download/v$(NAVIDROME_VERSION)/navidrome_$(NAVIDROME_VERSION)_Linux_x86_64.tar.gz
+navidrome_url := https://github.com/deluan/navidrome/releases/download/v$(NAVIDROME_VERSION)/navidrome_$(NAVIDROME_VERSION)_linux_amd64.tar.gz
 
 /usr/local/bin/navidrome: $(navidrome_dir)/navidrome
 	install $< $@
