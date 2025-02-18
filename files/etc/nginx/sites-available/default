@@ -42,5 +42,20 @@ server {
                  proxy_pass http://127.0.0.1:4533;
         }
 
+        location /cfr-court-opinions {
+		 include mime.types;
+		 types {
+		             application/x-sqlite3 sqlite;
+			     application/x-sqlite3 sqlite3;
+			     application/wasm      wasm;
+		 }
+
+		 gzip on;
+		 gzip_types application/javascript text/css text/html application/wasm application/x-sqlite3;
+		 add_header Cache-Control "public, max-age=600";
+		 add_header Cross-Origin-Opener-Policy same-origin;
+		 add_header Cross-Origin-Embedder-Policy require-corp;
+	}
+
 	include custom/ssl_params;
 }
